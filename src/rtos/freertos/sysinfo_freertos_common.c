@@ -12,6 +12,7 @@
 // Extern, implemented by platform-specific C file
 
 extern const sysinfo_static_t board_info;
+extern void format_size(char *dst, size_t len, size_t bytes);
 extern void sysinfo_hwinfo_fetch(sysinfo_hwinfo_t *dst);
 extern void sysinfo_fetch(sysinfo_dynamic_t *dst);
 
@@ -46,7 +47,7 @@ void sysinfo_print(sysinfo_putline_fn putline, void *ctx) {
 	snprintf(mcu_line, sizeof(mcu_line), "MCU:     %s", mcu_name);
 #else
 	snprintf(header,   sizeof(header),   "%s@%s", board_info.username, board_info.hostname);
-	snprintf(uptime_line, sizeof(uptime_line), "Uptime:  %luh %lum %lus", dyn.uptime_h, dyn.uptime_m, dyn.uptime_s);
+	snprintf(uptime_line, sizeof(uptime_line), "Uptime:  %uh %um %us", dyn.uptime_h, dyn.uptime_m, dyn.uptime_s);
 	snprintf(mcu_line, sizeof(mcu_line), "MCU:     %s", board_info.mcu);
 #endif
 
