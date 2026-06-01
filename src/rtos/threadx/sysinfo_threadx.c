@@ -1,6 +1,10 @@
-#include <tx_api.h>
+#include "embfetch_rtos_platform.h"
+
+#if defined(EMBFETCH_THREADX)
+
 #include "rtos_sysinfo.h"
 #include "logo.h"
+#include <tx_api.h>
 #include "uart.h"
 //#include "board.h"      // define BOARD_NAME and MCU_NAME in your board header then uncomment
 
@@ -127,4 +131,5 @@ static void threadx_putline(void *ctx, const char *line) {
 }
 void sysinfo_print_threadx(void) {
     sysinfo_print(threadx_putline, NULL);
-} //sysinfo_threadx.c
+}
+#endif //sysinfo_threadx.c

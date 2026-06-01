@@ -1,0 +1,41 @@
+# FORMAT: PLATFORM : FILE
+# Files are relative to embfetch-rtos root
+
+COMMON : src/sysinfo_rtos_common.c
+COMMON : src/include/rtos_sysinfo.h
+COMMON : src/include/embfetch_config.h
+COMMON : src/include/embfetch_port.h
+COMMON : src/include/logo.h
+
+FREERTOS : src/rtos/freertos/sysinfo_freertos_common.c
+FREERTOS : src/rtos/freertos/sysinfo_freertos.c
+
+ESPIDF : src/rtos/freertos/sysinfo_freertos_common.c
+ESPIDF : src/rtos/freertos/sysinfo_esp_idf.c
+
+ZEPHYR : src/rtos/zephyr/sysinfo_zephyr_common.c
+ZEPHYR : src/rtos/zephyr/sysinfo_zephyr.c
+ZEPHYR : src/rtos/zephyr/prj.conf.example
+
+NRF_CONNECT : src/rtos/zephyr/sysinfo_zephyr_common.c
+NRF_CONNECT : src/rtos/zephyr/sysinfo_nrf-connect.c
+NRF_CONNECT : src/rtos/zephyr/prj.conf.example
+
+NUTTX : src/rtos/nuttx/sysinfo_nuttx.c
+NUTTX : src/rtos/nuttx/Kconfig
+NUTTX : src/rtos/nuttx/Makefile
+NUTTX : src/rtos/nuttx/Make.defs
+NUTTX : src/rtos/nuttx/embfetch_main.c
+
+RTTHREAD : src/rtos/rt-thread/sysinfo_rt_thread.c
+RTTHREAD : src/rtos/rt-thread/Kconfig
+RTTHREAD : src/rtos/rt-thread/SConscript
+RTTHREAD : src/rtos/rt-thread/package.json
+
+THREADX : src/rtos/threadx/sysinfo_threadx.c
+
+KEIL_RTX4 : src/rtos/keil-rtx/sysinfo_keil_rtx_common.c
+KEIL_RTX4 : src/rtos/keil-rtx/sysinfo_keil_rtx4.c
+
+KEIL_RTX5 : src/rtos/keil-rtx/sysinfo_keil_rtx_common.c
+KEIL_RTX5 : src/rtos/keil-rtx/sysinfo_keil_rtx5.c

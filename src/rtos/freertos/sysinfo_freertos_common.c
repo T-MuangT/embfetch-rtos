@@ -1,18 +1,23 @@
-#include <stdio.h>
-#include <string.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "rtos_sysinfo.h"
-#include "logo.h"
+#include "embfetch_rtos_platform.h"
 
-#if defined(ESP_PLATFORM)
-#include <inttypes.h>
+#if defined(EMBFETCH_FREERTOS) || defined(EMBFETCH_ESPIDF)
+
+#if defined(EMBFETCH_FREERTOS)
+#include "FreeRTOS.h"
+#elif defined(EMBFETCH_ESPIDF)
+#include "freertos/FreeRTOS.h"
 #endif
 
-// Extern, implemented by platform-specific C file
+#include "rtos_sysinfo.h"
+#include <stdio.h>
+#include <string.h>
+#include <inttypes.h>
+#include "task.h"
 
-extern const sysinfo_static_t board_info;
-extern void format_size(char *dst, size_t len, size_t bytes);
+// Extern — implemented by platform-specific file (sysinfo_freertos.c or sysinfo_esp-idf.c)
+// board_info is non-const to allow runtime mutation on platforms like ESP-IDF
+// where mcu and hostname are resolved via chip_info_init()
+extern sysinfo_static_t board_info;
 extern void sysinfo_hwinfo_fetch(sysinfo_hwinfo_t *dst);
 extern void sysinfo_fetch(sysinfo_dynamic_t *dst);
 
@@ -27,7 +32,7 @@ void format_size(char *dst, size_t len, size_t bytes) {
     }
 }
 
-// Print logo and info
+// Print logo and info — no platform ifdefs, NULL checks handle all cases
 void sysinfo_print(sysinfo_putline_fn putline, void *ctx) {
     sysinfo_dynamic_t dyn;
     sysinfo_fetch(&dyn);
@@ -37,24 +42,18 @@ void sysinfo_print(sysinfo_putline_fn putline, void *ctx) {
     char header[64], separator[32];
     char os_line[64], kernel_line[64], mcu_line[64], build_line[64],
          flash_line[64], ram_line[64], uptime_line[64], heap_line[64];
-#if defined(ESP_PLATFORM)
-	// hostname and mcu are runtime-resolved in sysinfo_esp-idf.c
-	extern const char *mcu_name;
-	extern const char *hostname;
-	snprintf(header,   sizeof(header),   "%s@%s", board_info.username, hostname);
-	snprintf(uptime_line, sizeof(uptime_line), "Uptime:  %" PRIu32 "h %" PRIu32 "m %" PRIu32 "s",
-	         dyn.uptime_h, dyn.uptime_m, dyn.uptime_s);
-	snprintf(mcu_line, sizeof(mcu_line), "MCU:     %s", mcu_name);
-#else
-	snprintf(header,   sizeof(header),   "%s@%s", board_info.username, board_info.hostname);
-	snprintf(uptime_line, sizeof(uptime_line), "Uptime:  %uh %um %us", dyn.uptime_h, dyn.uptime_m, dyn.uptime_s);
-	snprintf(mcu_line, sizeof(mcu_line), "MCU:     %s", board_info.mcu);
-#endif
 
+    snprintf(header,      sizeof(header),      "%s@%s",
+             board_info.username ? board_info.username : "root",
+             board_info.hostname ? board_info.hostname : "Unknown");
     snprintf(separator,   sizeof(separator),   "----------------");
     snprintf(os_line,     sizeof(os_line),     "OS:      %s", board_info.os_name);
     snprintf(kernel_line, sizeof(kernel_line), "Kernel:  %s", dyn.kernel_version);
+    snprintf(uptime_line, sizeof(uptime_line), "Uptime:  %" PRIu32 "h %" PRIu32 "m %" PRIu32 "s",
+             dyn.uptime_h, dyn.uptime_m, dyn.uptime_s);
     snprintf(build_line,  sizeof(build_line),  "Build:   %s", board_info.build_date);
+    snprintf(mcu_line,    sizeof(mcu_line),    "MCU:     %s",
+             board_info.mcu ? board_info.mcu : "Unknown");
     snprintf(ram_line,    sizeof(ram_line),    "Memory:  %s", hw.ram);
     snprintf(heap_line,   sizeof(heap_line),   "Heap:    %s used / %s free", dyn.heap_used, dyn.heap_free);
     snprintf(flash_line,  sizeof(flash_line),  "Flash:   %s", hw.flash);
@@ -81,4 +80,5 @@ void sysinfo_print(sysinfo_putline_fn putline, void *ctx) {
             snprintf(line, sizeof(line), "%s", logo_part);
         putline(ctx, line);
     }
-} // sysinfo_freertos_common.c
+}
+#endif // sysinfo_freertos_common.c

@@ -7,43 +7,27 @@
 
 typedef void (*sysinfo_putline_fn)(void *ctx, const char *line);
 
-#if defined(__ZEPHYR__)
-#include <zephyr/shell/shell.h>
-    void sysinfo_print_shell(const struct shell *sh);
-#elif defined(RT_USING_FINSH)
-    void sysinfo_print_rt(void);
-#elif defined(CONFIG_NUTTX) || defined(__NuttX__)
-    void sysinfo_print_nuttx(void);
-#elif defined(TX_API_H) || defined(TX_THREAD_H)
-    void sysinfo_print_threadx(void);
-#elif defined(ESP_PLATFORM)
-    void sysinfo_print_espidf(void);
-#elif defined(FREERTOS_CONFIG_H) || defined(INC_FREERTOS_H)
-    void sysinfo_print_uart(void);
-#elif defined(osRtxVersionKernel) || defined(USING_KEIL_RTX)
-    void sysinfo_print_rtx(void (*uart_puts)(const char *));
-#endif
-
 // Static board info.
+// All fields are present on all platforms.
+// Fields that are not applicable on a given platform should be set to NULL.
+// - username: NULL on NuttX (fetched dynamically via sysinfo_fetch())
+// - mcu, hostname: NULL on ESP-IDF (resolved at runtime via chip_info_init())
 typedef struct {
     const char *os_name;
-	const char *build_date;
-#if !defined(CONFIG_NUTTX) || !defined(__NuttX__)
-    const char *username;       // "root", not actual username. NuttX has user info.
-#endif
-#if !defined(ESP_PLATFORM)
-    const char *mcu;			// Runtime on ESP-IDF via esp_chip_info() will have both mcu and hostname info.
-    const char *hostname;   	// Name of board, not actual hostname.
-#endif
+    const char *build_date;
+    const char *username;       // NULL on NuttX
+    const char *mcu;            // NULL on ESP-IDF, resolved via chip_info_init()
+    const char *hostname;       // NULL on ESP-IDF, resolved via chip_info_init()
 } sysinfo_static_t;
 
-//Hardware info.
+// Hardware info.
 typedef struct {
     char flash[16];
     char ram[16];
 } sysinfo_hwinfo_t;
 
 // Dynamic runtime info.
+// username: populated on NuttX only, NULL or empty on other platforms.
 typedef struct {
     char     kernel_version[32];
     uint32_t uptime_h;
@@ -51,18 +35,15 @@ typedef struct {
     uint32_t uptime_s;
     char     heap_used[16];
     char     heap_free[16];
-#if defined(CONFIG_NUTTX) || defined(__NuttX__)
-    char     username[32];
-#endif
+    char     username[32];      // populated on NuttX, empty string on other platforms
 } sysinfo_dynamic_t;
 
 // Public API
-// Fetch hardware info and dynamic info into dst, print logo and info using putline callback.
 void sysinfo_hwinfo_fetch(sysinfo_hwinfo_t *dst);
 void sysinfo_fetch(sysinfo_dynamic_t *dst);
 void sysinfo_print(sysinfo_putline_fn putline, void *ctx);
 
-// Wrapper for output target.
+// Output wrappers — implemented in sysinfo_rtos_common.c
 void sysinfo_print_file(FILE *f);
 void sysinfo_print_puts(void (*puts_fn)(const char *));
 

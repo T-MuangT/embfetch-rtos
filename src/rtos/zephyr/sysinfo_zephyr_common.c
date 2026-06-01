@@ -1,12 +1,17 @@
+#include "embfetch_rtos_platform.h"
+
+#if defined(EMBFETCH_ZEPHYR) || defined(EMBFETCH_NRF_CONNECT)
+
+#include "rtos_sysinfo.h"
 #include <zephyr/kernel.h>
 #include <zephyr/sys/util.h>
 #include <zephyr/sys/mem_stats.h>
 #include <zephyr/sys/sys_heap.h>
 #include <zephyr/shell/shell.h>
-#include "rtos_sysinfo.h"
-#include "logo.h"
+#include <inttypes.h>
 
-// Extern, implemented by platform-specific C file
+// Extern — implemented by platform-specific file (sysinfo_zephyr.c or sysinfo_nrf-connect.c)
+// board_info is const — Zephyr subfamily board info is always compile-time constant
 extern const sysinfo_static_t board_info;
 extern void sysinfo_hwinfo_fetch(sysinfo_hwinfo_t *dst);
 
@@ -21,7 +26,7 @@ static void format_size(char *dst, size_t len, size_t bytes) {
     }
 }
 
-// Dynamic info fetching — kernel version, uptime, heap
+// Dynamic info — kernel version, uptime, heap
 void sysinfo_fetch(sysinfo_dynamic_t *dst) {
     uint32_t ver = sys_kernel_version_get();
     snprintf(dst->kernel_version, sizeof(dst->kernel_version),
@@ -46,9 +51,12 @@ void sysinfo_fetch(sysinfo_dynamic_t *dst) {
     snprintf(dst->heap_used, sizeof(dst->heap_used), "Unknown");
     snprintf(dst->heap_free, sizeof(dst->heap_free), "Unknown");
 #endif
+
+    // username not used on Zephyr
+    dst->username[0] = '\0';
 }
 
-// Print logo and info
+// Print logo and info — no platform ifdefs, NULL checks handle all cases
 void sysinfo_print(sysinfo_putline_fn putline, void *ctx) {
     sysinfo_dynamic_t dyn;
     sysinfo_fetch(&dyn);
@@ -59,13 +67,17 @@ void sysinfo_print(sysinfo_putline_fn putline, void *ctx) {
     char os_line[64], kernel_line[64], mcu_line[64], build_line[64],
          flash_line[64], ram_line[64], uptime_line[64], heap_line[64];
 
-    snprintf(header,      sizeof(header),      "%s@%s", board_info.username, board_info.hostname);
+    snprintf(header,      sizeof(header),      "%s@%s",
+             board_info.username ? board_info.username : "root",
+             board_info.hostname ? board_info.hostname : "Unknown");
     snprintf(separator,   sizeof(separator),   "----------------");
     snprintf(os_line,     sizeof(os_line),     "OS:      %s", board_info.os_name);
     snprintf(kernel_line, sizeof(kernel_line), "Kernel:  %s", dyn.kernel_version);
-    snprintf(uptime_line, sizeof(uptime_line), "Uptime:  %uh %um %us", dyn.uptime_h, dyn.uptime_m, dyn.uptime_s);
+    snprintf(uptime_line, sizeof(uptime_line), "Uptime:  %" PRIu32 "h %" PRIu32 "m %" PRIu32 "s",
+             dyn.uptime_h, dyn.uptime_m, dyn.uptime_s);
     snprintf(build_line,  sizeof(build_line),  "Build:   %s", board_info.build_date);
-    snprintf(mcu_line,    sizeof(mcu_line),    "MCU:     %s", board_info.mcu);
+    snprintf(mcu_line,    sizeof(mcu_line),    "MCU:     %s",
+             board_info.mcu ? board_info.mcu : "Unknown");
     snprintf(ram_line,    sizeof(ram_line),    "Memory:  %s", hw.ram);
     snprintf(heap_line,   sizeof(heap_line),   "Heap:    %s used / %s free", dyn.heap_used, dyn.heap_free);
     snprintf(flash_line,  sizeof(flash_line),  "Flash:   %s", hw.flash);
@@ -101,4 +113,6 @@ static void zephyr_shell_putline(void *ctx, const char *line) {
 
 void sysinfo_print_shell(const struct shell *sh) {
     sysinfo_print(zephyr_shell_putline, (void *)sh);
-} // sysinfo_zephyr_common.c
+}
+
+#endif // sysinfo_zephyr_common.c

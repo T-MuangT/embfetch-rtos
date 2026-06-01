@@ -1,11 +1,14 @@
+#include "embfetch_rtos_platform.h"
+
+#if defined(EMBFETCH_RTTHREAD)
+
+#include "rtos_sysinfo.h"
+#include "logo.h"
 #include <rtthread.h>
 #include <rtdevice.h>
 #include "rtconfig.h"
-#include "board.h"
 #include <stdio.h>
 #include <string.h>
-#include "rtos_sysinfo.h"
-#include "logo.h"
 //#include "board.h"            // define BOARD_NAME and SOC_NAME then uncomment
 //#include "kernel_version.h"   // define RT_VERSION, RT_SUBVERSION, RT_REVISION then uncomment
 
@@ -162,3 +165,5 @@ void embfetch(void) {
 }
 
 MSH_CMD_EXPORT(embfetch, Print system info);
+
+#endif //sysinfo_rt-thread.c

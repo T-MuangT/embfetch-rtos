@@ -1,5 +1,10 @@
-#include <zephyr/kernel.h>
+#include "embfetch_rtos_platform.h"
+
+#if defined(EMBFETCH_ZEPHYR)
+
 #include "rtos_sysinfo.h"
+#include "logo.h"
+#include <zephyr/kernel.h>
 
 #if defined(CONFIG_FLASH)
 #include <zephyr/drivers/flash.h>
@@ -46,4 +51,5 @@ void sysinfo_hwinfo_fetch(sysinfo_hwinfo_t *dst) {
 #else
     snprintf(dst->flash, sizeof(dst->flash), "Unknown");
 #endif
-} // sysinfo_zephyr.c
+}
+#endif // sysinfo_zephyr.c

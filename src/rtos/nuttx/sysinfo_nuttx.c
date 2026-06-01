@@ -1,10 +1,14 @@
+#include "rtos_platform.h"
+
+#if defined(EMBFETCH_NUTTX)
+
+#include "rtos_sysinfo.h"
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <sys/boardctl.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 #include <time.h>
-#include "rtos_sysinfo.h"
 #include "logo.h"
 
 // Static board info fetching
@@ -128,4 +132,5 @@ static void nuttx_putline(void *ctx, const char *line) {
 }
 void sysinfo_print_nuttx(void) {
     sysinfo_print(nuttx_putline, NULL);
-} //sysinfo_nuttx.c
+}
+#endif //sysinfo_nuttx.c
