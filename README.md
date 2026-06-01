@@ -12,9 +12,9 @@ Currently, the supported systems are as follows:
 There are three scripts to choose from, each doing the exact same thing, but for different shell environments.
 | Script Name | Environment | Command |
 | :--- | :--- | :--- |
-| `package.py` | Python | python package.py <platform> <destination_dir> |
-| `package.sh` | Bash/Zsh/POSIX | /package.sh <platform> <destination_dir> |
-| `package.ps1` | PowerShell | .\package.ps1 <platform> <destination_dir> |
+| `package.py` | Python | `python ./scripts/package.py <platform> <destination_dir>` |
+| `package.sh` | Bash/Zsh/POSIX | `./scripts/package.sh <platform> <destination_dir>` |
+| `package.ps1` | PowerShell | `.\scripts\package.ps1 <platform> <destination_dir>` |
 
 ### Prerequisites and installation
 
